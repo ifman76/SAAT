@@ -1,0 +1,26 @@
+<!-- survey_results.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Survey Results</title>
+</head>
+<body>
+    <h1>Survey Results</h1>
+    <table border="1">
+        <tr>
+            <th>Email</th>
+            <th>Gender</th>
+            <th>Age</th>
+            <th>Security Experience</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

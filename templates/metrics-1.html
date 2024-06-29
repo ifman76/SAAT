@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mtrics-1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @media (max-width: 600px) {
+            /* 스마트폰과 같이 작은 화면을 위한 스타일 */
+        }
+        .selected {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <h2>측정1(Metrics-1)</h2>
+    <p>
+            아래 질문을 읽고 정답을 선택해주세요.
+            (Read the questions below and select the correct answer.)
+        </p>
+
+    <!-- 문제 표시 -->
+    <form action="/submit_metrics_1" method="POST">
+        {% for item in question %}
+        <p>{{ item['number'] }}. {{ item['questions'] }}</p>
+        {% if item['choose1'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="1">{{ item['choose1'] }}<br>
+        {% endif %}
+        {% if item['choose2'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="2">{{ item['choose2'] }}<br>
+        {% endif %}
+        {% if item['choose3'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="3">{{ item['choose3'] }}<br>
+        {% endif %}
+        {% if item['choose4'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="4">{{ item['choose4'] }}<br>
+        {% endif %}
+        <br>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        const form = document.querySelector("form");
+
+        form.addEventListener("submit", () => {
+            const selectedAnswers = Array.from(form.elements).filter(element => element.type === "radio" && element.checked).map(element => element.value);
+            // 여기서 선택된 답안 값을 처리하거나 전송할 수 있습니다.
+            // 선택된 답안들은 selectedAnswers 배열에 저장됩니다.
+            // 예를 들어, 선택된 답안들을 출력하거나 서버로 전송하는 등의 작업을 할 수 있습니다.
+            console.log("Selected answers:", selectedAnswers);
+        });
+    </script>
+</body>
+</html>

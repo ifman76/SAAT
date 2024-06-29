@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Measuring Security Awareness</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @media (max-width: 600px) {
+            /* 스마트폰과 같이 작은 화면을 위한 스타일 */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            width: 50%;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        textarea,
+        select {
+            width: calc(100% - 12px);
+            padding: 6px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        input[type="submit"] {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        function validateForm() {
+            var email = document.getElementById('email').value;
+            var gender = document.getElementById('gender').value;
+            var age = document.getElementById('age').value;
+            var securityExperience = document.getElementById('security_experience').value;
+            var agree = document.getElementById('agree').checked;
+
+            if (!agree) {
+                alert("동의하지 않으면 설문에 참여할 수 없습니다. (You must agree to participate in the survey)");
+                return false;
+            }
+            if (email == "" || gender == "" || age == "" || securityExperience == "") {
+                alert("모든 필드를 채워주세요. (Please fill in all fields)");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>   
+    <form action="/submit_info" method="post" onsubmit="return validateForm()">
+        <h3>보안인식 측정(Measuring Security Awareness)</h3>
+         <p>
+            본 조사는 [보안인식 수준측정을 위한 연구]를 위해 개인정보를 수집하고 있습니다.
+            본 설문에서는 [이메일, 성별, 연령, 보안분야 경험]을 수집합니다. 수집된 정보는 본 연구에만 사용되며, 연구종료 후 안전하게 파기됩니다. 
+            귀하의 개인정보 제공은 자발적이며, 동의를 거부하실 수 있습니다. 단, 동의하지 않을 경우 연구 참여가 불가합니다. <br><br>
+            (This survey is collecting personal information for a study to measure security awareness.
+            This survey collects [email, gender, age, security experience]. The information collected will only be used for this study and will be securely destroyed after the study is completed. 
+            Providing your personal information is voluntary, and you may refuse to consent. However, if you do not agree, you will not be able to participate.)
+        </p>
+
+        <label><input type="checkbox" id="agree" name="agree">동의합니다.(I agree)<label for="agree"></label>
+        
+        <br><br>
+
+
+        <label for="email">1. 이메일(email):</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="gender">2. 성별(gender):</label>
+        <select id="gender" name="gender" required>
+            <option value="male">남성(male)</option>
+            <option value="female">여성(female)</option>
+        </select><br><br>
+
+        <label for="age">3. 연령:</label>
+        <select id="age" name="age" required>
+            <option value="10">10대 이하(teens)</option>
+            <option value="20">20대(20s)</option>
+            <option value="30">30대(30s)</option>
+            <option value="40">40대(40s)</option>
+            <option value="50">50대(50s)</option>
+            <option value="60">60대 이상(over 60s)</option>
+        </select><br><br>
+
+        <label for="security_experience">4. 보안분야 경험(Security experience):</label>
+        <select id="security_experience" name="security_experience" required>
+            <option value="0">전혀 없음(None)</option>
+            <option value="5">5년 미만(Less than 5 years)</option>
+            <option value="10">5~10년(5 to 10 years)</option>
+            <option value="20">11~20년(11 to 20 years)</option>
+            <option value="21">20년 이상(over 20 years)</option>
+        </select><br><br>
+
+
+
+        <input type="submit" value="제출">
+    </form>
+</body>
+</html>

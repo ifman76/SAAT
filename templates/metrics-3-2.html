@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mtrics-3-1 additonal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        @media (max-width: 600px) {
+            /* 스마트폰과 같이 작은 화면을 위한 스타일 */
+        }
+        .selected {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <h2>측정3-2(Metrics-3-2)</h2>
+    <p>
+            귀하의 정보지식처리역량 정도를 측정합니다. 아래 질문에 답해주세요<br>
+            (We'll measure your level of information literacy. Please answer the questions below)
+        </p>
+    <!-- 문제 표시 -->
+    <form id="surveyForm" action="/submit_metrics_3_2" method="POST">
+        {% for item in question %}
+        <p>{{ item['number'] }}. {{ item['questions'] }}</p>
+        {% if item['choose1'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="1">{{ item['choose1'] }}<br>
+        {% endif %}
+        {% if item['choose2'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="2">{{ item['choose2'] }}<br>
+        {% endif %}
+        {% if item['choose3'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="3">{{ item['choose3'] }}<br>
+        {% endif %}
+        {% if item['choose4'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="4">{{ item['choose4'] }}<br>
+        {% endif %}
+        {% if item['choose5'] %}
+        <input type="radio" name="answer{{ loop.index }}" value="5">{{ item['choose5'] }}<br>
+        {% endif %}
+        <br>
+        {% endfor %}
+        <input type="submit" value="완료(Submit)">
+    </form>
+
+    <script>
+        const form = document.getElementById('surveyForm'); // 폼 요소를 선택하여 변수에 할당
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // 폼의 기본 제출 동작을 막음
+
+        // 'this'를 사용하여 이벤트가 발생한 폼 요소에 접근
+        const selectedAnswers = Array.from(this.elements)
+            .filter(element => element.type === "radio" && element.checked)
+            .map(element => element.value);
+            console.log("Selected answers:", selectedAnswers);
+
+            fetch('/submit_metrics_3_2', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        //'X-CSRFToken': getCookie('csrftoken') // 쿠키에서 CSRF 토큰을 가져와서 사용
+                    },
+                    body: JSON.stringify({ selected_answers: selectedAnswers })
+                })
+                .then(response => response.json())
+                .then(data => {
+                     if (data.status === "success" && data.nextStep === "ask") {
+                    // 사용자에게 다음 단계 선택 요청
+                    var userChoice = confirm("측정3단계(metrics-3)에서는 호기심, 지식정보처리역량 외에도, 추가로 문제를 풀어서 측정 점수를 추가할 수 있습니다. 추가 문제를 풀려면 '확인'를 클릭하고, 측정을 종료하려면 '취소'를 클릭하세요 (In metrics-3, in addition to curiosity and knowledge information literacy, you can add additional questions to the measurement. Click 'OK' to take additional questions or 'Cancel' to end the measurement");
+                        if (userChoice) {
+                            // '예'를 선택한 경우, 추가 문제 페이지로 이동
+                            window.location.href = '/metrics3_additional_page';
+                        } else {
+                            // '아니오'를 선택한 경우, 다음 단계 페이지로 이동
+                            window.location.href = '/result_page';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // 오류 발생 시 처리
+                });
+    });
+    </script>
+</body>
+</html>

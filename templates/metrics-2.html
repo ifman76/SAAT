@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mtrics-3-2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        @media (max-width: 600px) {
+            /* 스마트폰과 같이 작은 화면을 위한 스타일 */
+        }
+        .selected {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<h2>측정2(Metrics-2)</h2><br>
+        <p>
+            귀하께서 주로 사용하는 제품을 선택해주세요.복수 선택 가능합니다.
+            (Please select the product(s) you primarily use, you can select more than one.)
+        </p>
+    <form method="POST" action="/">
+        <h3>1. 카테고리 선택 (Choose Category)</h3>
+        <label for="category">카테고리(Category):</label>
+        <select id="category" name="selected_category">
+            <option value="None">None</option>
+            {% for category in categories %}
+            <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
+        <br>
+    </form>
+
+    <div id="makerDiv" style="display: none;">
+        <h3>2. 메이커 선택 (Choose Maker)</h3>
+        <form>
+            <label for="maker">메이커(Makers):</label>
+            <select id="maker" name="selected_maker">
+                <option value="None">None</option>
+            </select>
+            <br>
+        </form>
+    </div>
+
+    <div id="productDiv" style="display: none;">
+        <h3>3. 제품 선택 (Chosse Product)</h3>
+        <form method="POST" action="/result">
+            <label for="product">제품(Products):</label>
+            <select id="product" name="selected_answers">
+                <option value="None">None</option>
+            </select>
+            <br>
+            <div id="productScoreDiv" style="display: none;">
+                <label for="productScore">점수:</label>
+                <input type="text" id="productScore" name="product_score" value="0" readonly>
+            </div>
+            <br>
+            <button type="button" id="confirmBtn" style="display: none;">확인(Confirm)</button>
+        </form>
+    </div>
+
+    <div id="selectedProductsDiv" style="display: none;">
+        <h3>★ 선택한 제품 목록 (Selected products)</h3>
+        <p id="selectedProductsText"></p>
+        <ul id="selectedProductsList"></ul>
+    <!--
+        <div id="scoreDiv" style="display: none;">
+            <h2>점수</h2>
+            <p id="totalScore">0</p>
+        </div>
+    -->
+        <p>다른 제품을 추가하려면 맨위(카테고리)에서 계속 선택하시고, 종료를 원하시면 아래 '완료' 버튼을 클릭해주세요.(If you would like to add additional products, please continue selecting them above(categoty), or click the 'Done' button below to exit.)</p>
+        <button type="button" id="completeBtn">완료(Done)</button>
+    </div>
+
+    <br>
+
+    <script>
+        // 카테고리 선택 시 이벤트 처리
+        document.getElementById("category").addEventListener("change", function () {
+            var selectedCategory = this.value;
+            fetch('/select_maker', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ selected_category: selectedCategory })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var makers = data.makers;
+                    var makerSelect = document.getElementById("maker");
+                    makerSelect.innerHTML = "";
+                    var noneOption = document.createElement("option");
+                    noneOption.value = "None";
+                    noneOption.innerText = "None";
+                    makerSelect.appendChild(noneOption);
+                    makers.forEach(function (maker) {
+                        var option = document.createElement("option");
+                        option.value = maker;
+                        option.innerText = maker;
+                        makerSelect.appendChild(option);
+                    });
+                    updateProducts();
+                    document.getElementById("makerDiv").style.display = "block";
+                });
+        });
+
+        // maker 선택 시 이벤트 처리
+        document.getElementById("maker").addEventListener("change", function () {
+            updateProducts();
+            document.getElementById("productDiv").style.display = "block";
+        });
+
+        function updateProducts() {
+            var selectedCategory = document.getElementById("category").value;
+            var selectedMaker = document.getElementById("maker").value;
+            fetch('/select_product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    selected_category: selectedCategory,
+                    selected_maker: selectedMaker
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var products = data.products;
+                    var productSelect = document.getElementById("product");
+                    productSelect.innerHTML = "";
+                    var noneOption = document.createElement("option");
+                    noneOption.value = "None";
+                    noneOption.innerText = "None";
+                    productSelect.appendChild(noneOption);
+                    products.forEach(function (product) {
+                        var option = document.createElement("option");
+                        option.value = product;
+                        option.innerText = product;
+                        productSelect.appendChild(option);
+                    });
+                    //document.getElementById("productScore").value = "0";
+                });
+        }
+
+        document.getElementById("product").addEventListener("change", function () {
+            var selectedProduct = this.value;
+            if (selectedProduct === 'None') {
+                document.getElementById("selectedProductsText").innerText = "선택한 제품이 없습니다.";
+                document.getElementById("confirmBtn").style.display = "none";
+            } else {
+            /*
+                fetch('/check_product_cc', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ selected_product: selectedProduct })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        var ccValue = data.cc_value;
+                        if (ccValue === 'O') {
+                            var productScoreField = document.getElementById("productScore");
+                            var score = parseInt(productScoreField.value) + 1;
+                            productScoreField.value = score;
+                            var totalScoreField = document.getElementById("totalScore");
+                            var totalScore = parseInt(totalScoreField.innerText) + 1;
+                            totalScoreField.innerText = totalScore;
+                        }
+                    });
+                    */
+                document.getElementById("selectedProductsText").innerText = "";
+                document.getElementById("confirmBtn").style.display = "block";
+            } 
+        });
+
+        document.getElementById("confirmBtn").addEventListener("click", function () {
+            var selectedProduct = document.getElementById("product").value;
+            var isDuplicate = Array.from(document.getElementById("selectedProductsList").getElementsByTagName("li"))
+                .some(function (item) {
+                    return item.innerText === selectedProduct;
+                });
+            if (isDuplicate) {
+                alert("이미 선택한 제품입니다.");
+            } else {
+                var selectedProductItem = document.createElement("li");
+                selectedProductItem.innerText = selectedProduct;
+            document.getElementById("selectedProductsList").appendChild(selectedProductItem);
+                document.getElementById("product").selectedIndex = 0;
+                document.getElementById("selectedProductsDiv").style.display = "block";
+                //document.getElementById("addProductBtn").style.display = "block";
+                var productScoreField = document.getElementById("productScore");
+                var score = parseInt(productScoreField.value);
+                var totalScore = parseInt(document.getElementById("totalScore").innerText) + score;
+                document.getElementById("totalScore").innerText = totalScore;
+                document.getElementById("scoreDiv").style.display = "block";
+            }
+        });
+
+       function getCookie(name) {
+            const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return cookieValue ? cookieValue.pop() : '';
+        }
+
+        // 완료 버튼 클릭 시 이벤트 처리
+        document.getElementById("completeBtn").addEventListener("click", function () {
+            var selectedProducts = Array.from(document.getElementById("selectedProductsList").getElementsByTagName("li"))
+                .map(function (item) {
+                    return item.innerText;
+                });
+
+            console.log('Selected Products=:', selectedProducts);
+
+            fetch('/submit_metrics_2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') // 쿠키에서 CSRF 토큰을 가져와서 사용
+                },
+                body: JSON.stringify({ selected_products: selectedProducts })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.nextStep === "ask") {
+                    // 사용자에게 다음 단계 선택 요청
+                    var userChoice = confirm("측정2단계(metrics-2)에서는 보유한 제품 선택 외에도, 추가로 문제를 풀어서 측정 점수를 추가할 수 있습니다. 추가 문제를 풀려면 '확인'를 클릭하고, 다음 단계(측정3, Metrics-3)로 넘어가려면 '취소'를 클릭하세요 (In step 2 (metrics-2), in addition to selecting the products you have, you can add additional measurement points by solving additional questions. Click 'OK' to take the additional questions, or 'Cancel' to move on to the next step (metrics-3)");
+                    if (userChoice) {
+                        // '예'를 선택한 경우, 추가 문제 페이지로 이동
+                        window.location.href = '/metrics2_additional_page';
+                    } else {
+                        // '아니오'를 선택한 경우, 다음 단계 페이지로 이동
+                        window.location.href = '/metrics3_page';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // 오류 발생 시 처리
+            });
+        });
+    </script>
+</body>
+</html>
+           
